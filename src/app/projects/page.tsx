@@ -109,57 +109,59 @@ export default function ProjectsPage() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
                   transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  className="group relative h-[600px] rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5 cursor-pointer"
+                  className="group relative h-[450px] md:h-[600px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5 cursor-pointer"
                 >
-                  <img 
-                    src={p.img} 
-                    alt={p.title} 
-                    className="w-full h-full object-cover grayscale-[0.2] transition-all duration-1000 group-hover:scale-110 group-hover:grayscale-0" 
-                  />
-                  
-                  {/* Detailed Info Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/20 to-transparent p-12 flex flex-col justify-end">
-                    <div className="translate-y-16 group-hover:translate-y-0 transition-transform duration-700 ease-out">
-                      <div className="flex items-center gap-3 mb-6">
-                        <span className="h-[2px] w-12 bg-primary block" />
-                        <span className="text-primary text-xs font-black uppercase tracking-[0.4em]">{p.cat}</span>
-                      </div>
-                      <h3 className="text-5xl text-white font-heading font-black mb-10 leading-none">{p.title}</h3>
-                      
-                      <div className="grid grid-cols-3 gap-8 border-t border-white/10 pt-8 mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 delay-200">
-                        <div className="flex flex-col gap-1">
-                          <span className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-black tracking-widest">
-                            <MapPin className="w-3 h-3" /> Location
-                          </span>
-                          <span className="text-white text-xs font-bold uppercase">{p.loc}</span>
+                  <Link href={`/projects/${p.slug}`} className="block w-full h-full relative cursor-pointer group">
+                    <img 
+                      src={p.img} 
+                      alt={p.title} 
+                      className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] transition-all duration-1000 group-hover:scale-110 group-hover:grayscale-0" 
+                    />
+                    
+                    {/* Detailed Info Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/20 to-transparent p-8 md:p-12 flex flex-col justify-end">
+                      <div className="translate-y-8 md:translate-y-16 group-hover:translate-y-0 transition-transform duration-700 ease-out">
+                        <div className="flex items-center gap-3 mb-4 md:mb-6">
+                          <span className="h-[2px] w-8 md:w-12 bg-primary block" />
+                          <span className="text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">{p.cat}</span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-black tracking-widest">
-                            <Maximize className="w-3 h-3" /> Area
-                          </span>
-                          <span className="text-white text-xs font-bold uppercase">{p.area}</span>
+                        <h3 className="text-3xl sm:text-4xl md:text-5xl text-white font-heading font-black mb-6 md:mb-10 leading-none">{p.title}</h3>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 border-t border-white/10 pt-6 md:pt-8 mt-6 md:mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 delay-200">
+                          <div className="flex flex-col gap-1">
+                            <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
+                              <MapPin className="w-3 h-3 hidden sm:block" /> Location
+                            </span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase truncate">{p.loc}</span>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
+                              <Maximize className="w-3 h-3 hidden sm:block" /> Area
+                            </span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.area}</span>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
+                              <Calendar className="w-3 h-3 hidden sm:block" /> Year
+                            </span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.year}</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-black tracking-widest">
-                            <Calendar className="w-3 h-3" /> Year
-                          </span>
-                          <span className="text-white text-xs font-bold uppercase">{p.year}</span>
-                        </div>
-                      </div>
 
-                      <div className="mt-12 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-1000 delay-400">
-                         <Button variant="outline" size="sm" className="h-14 px-10 rounded-2xl bg-white/10 text-white border-white/20 hover:bg-white hover:text-primary transition-all duration-500 font-black tracking-widest uppercase text-xs">
-                            View Case Study
-                         </Button>
-                         <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center hover:bg-primary transition-all duration-500 group-btn">
-                            <ArrowUpRight className="w-8 h-8 text-white group-btn-hover:rotate-45" />
-                         </div>
+                        <div className="mt-8 md:mt-12 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-1000 delay-400">
+                           <span className="h-10 md:h-14 flex items-center px-6 md:px-10 rounded-xl md:rounded-2xl bg-white/10 text-white border border-white/20 hover:bg-white hover:text-primary transition-all duration-500 font-black tracking-widest uppercase text-[9px] md:text-xs">
+                              View Case Study
+                           </span>
+                           <div className="w-10 h-10 md:w-16 md:h-16 rounded-full border border-white/20 flex items-center justify-center hover:bg-primary transition-all duration-500 group-btn shrink-0 ml-2">
+                              <ArrowUpRight className="w-5 h-5 md:w-8 md:h-8 text-white group-hover:rotate-45" />
+                           </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Floating ID Card for visual interest */}
-                  <div className="absolute top-10 left-10 w-1 w-12 bg-primary group-hover:h-24 transition-all duration-700" />
+                    
+                    {/* Floating ID Card for visual interest */}
+                    <div className="absolute top-6 left-6 md:top-10 md:left-10 w-1 md:w-1.5 h-8 md:h-12 bg-primary group-hover:h-16 md:group-hover:h-24 transition-all duration-700" />
+                  </Link>
                 </motion.div>
               ))}
             </AnimatePresence>

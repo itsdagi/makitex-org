@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { ProjectEditorModal } from "@/components/admin/ProjectEditorModal";
 
 const allProjects = [
   { id: 1, title: "Apex Tower", cat: "Commercial", loc: "Kazanchis", area: "12,000 sqm", year: "2024", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=200" },
@@ -29,6 +30,18 @@ const allProjects = [
 
 export default function AdminProjectsPage() {
   const [view, setView] = useState("Grid");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<any>(null);
+
+  const handleEdit = (proj: any) => {
+    setProjectToEdit(proj);
+    setIsEditorOpen(true);
+  };
+
+  const handleCreate = () => {
+    setProjectToEdit(null);
+    setIsEditorOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-16">
@@ -38,7 +51,10 @@ export default function AdminProjectsPage() {
           <p className="text-muted-foreground font-medium uppercase tracking-[0.3em] text-[10px]">Project Lifecycle & Asset Management</p>
         </div>
         
-        <Button className="h-20 px-12 rounded-[2rem] flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+        <Button 
+          onClick={handleCreate} 
+          className="h-20 px-12 rounded-[2rem] flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
+        >
            <Plus className="w-6 h-6" />
            <span className="text-xl font-heading font-black tracking-widest leading-none">Add Project</span>
         </Button>
@@ -101,7 +117,11 @@ export default function AdminProjectsPage() {
                   {p.cat}
                </div>
                <div className="absolute top-6 right-6 hidden group-hover:flex gap-2 transition-all">
-                  <Button variant="outline" className="h-10 w-10 p-0 rounded-xl bg-white/50 backdrop-blur-md border border-white/40 hover:bg-white text-primary">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleEdit(p)}
+                    className="h-10 w-10 p-0 rounded-xl bg-white/50 backdrop-blur-md border border-white/40 hover:bg-white text-primary"
+                  >
                      <Edit2 className="w-4 h-4" />
                   </Button>
                   <Button variant="outline" className="h-10 w-10 p-0 rounded-xl bg-rose-500/10 backdrop-blur-md border border-rose-500/30 hover:bg-rose-500 text-rose-600 hover:text-white transition-all">
@@ -139,7 +159,10 @@ export default function AdminProjectsPage() {
         ))}
         
         {/* Placeholder / Empty State for creating */}
-        <div className="group h-full bg-accent/30 border-2 border-dashed border-primary/20 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center hover:border-primary/50 transition-all cursor-pointer">
+        <div 
+          onClick={handleCreate}
+          className="group h-full bg-accent/30 border-2 border-dashed border-primary/20 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center hover:border-primary/50 transition-all cursor-pointer"
+        >
            <div className="w-20 h-20 rounded-full bg-white border border-primary/10 flex items-center justify-center p-6 text-primary mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all">
               <Plus className="w-10 h-10" strokeWidth={3} />
            </div>
@@ -166,6 +189,13 @@ export default function AdminProjectsPage() {
             </div>
          </div>
       </section>
+      
+      <ProjectEditorModal 
+         isOpen={isEditorOpen}
+         onClose={() => setIsEditorOpen(false)}
+         projectToEdit={projectToEdit}
+         onSave={() => console.log('refresh metrics')}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { BlogEditorModal } from "@/components/admin/BlogEditorModal";
 
 const allPosts = [
   { id: 1, title: "The Future of Sustainable Construction", status: "Published", author: "Eng. Samuel K.", views: "1.2k", date: "Mar 15, 2026" },
@@ -26,6 +27,18 @@ const allPosts = [
 
 export default function AdminBlogPage() {
   const [search, setSearch] = useState("");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [postToEdit, setPostToEdit] = useState<any>(null);
+
+  const handleEdit = (post: any) => {
+    setPostToEdit(post);
+    setIsEditorOpen(true);
+  };
+
+  const handleCreate = () => {
+    setPostToEdit(null);
+    setIsEditorOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-16">
@@ -35,7 +48,10 @@ export default function AdminBlogPage() {
           <p className="text-muted-foreground font-medium uppercase tracking-[0.3em] text-[10px]">Content Management & Editorial</p>
         </div>
         
-        <Button className="h-20 px-12 rounded-[2rem] flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+        <Button 
+          onClick={handleCreate} 
+          className="h-20 px-12 rounded-[2rem] flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
+        >
            <Plus className="w-6 h-6" />
            <span className="text-xl font-heading font-black tracking-widest leading-none">New Entry</span>
         </Button>
@@ -115,7 +131,7 @@ export default function AdminBlogPage() {
               </div>
               
               <div className="col-span-1 flex justify-end gap-2">
-                 <Button variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-primary hover:text-white transition-all">
+                 <Button onClick={() => handleEdit(post)} variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-primary hover:text-white transition-all">
                     <Edit2 className="w-4 h-4" />
                  </Button>
                  <Button variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-destructive hover:text-white hover:border-destructive transition-all">
@@ -138,6 +154,13 @@ export default function AdminBlogPage() {
             <p className="text-[11px] font-medium text-muted-foreground italic mt-2 uppercase tracking-tight opacity-70">Average read time: 4.5 minutes</p>
          </div>
       </div>
+
+      <BlogEditorModal 
+        isOpen={isEditorOpen} 
+        onClose={() => setIsEditorOpen(false)} 
+        postToEdit={postToEdit} 
+        onSave={() => console.log("Refresh list")}
+      />
     </div>
   );
 }

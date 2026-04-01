@@ -92,40 +92,40 @@ export default function BlogPage() {
                  whileInView={{ opacity: 1, y: 0 }}
                  transition={{ delay: i * 0.1, duration: 0.8 }}
                  viewport={{ once: true }}
-                 className="group flex flex-col gap-8 h-full"
+                 className="group flex flex-col gap-6 sm:gap-8 h-full"
                >
-                 <Link href={`/blog/${post.slug}`} className="relative h-80 rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5">
+                 <Link href={`/blog/${post.slug}`} className="relative h-64 sm:h-80 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5">
                    <img 
                       src={post.img} 
                       alt={post.title} 
                       className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" 
                    />
-                   <div className="absolute top-8 left-8">
-                     <span className="px-5 py-2 bg-background/80 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.3em] text-primary border border-primary/20">
+                   <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
+                     <span className="px-4 py-2 sm:px-5 sm:py-2 bg-background/80 backdrop-blur-md rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-primary border border-primary/20">
                         {post.cat}
                      </span>
                    </div>
-                   <div className="absolute bottom-6 right-6 h-12 w-12 bg-primary rounded-full flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500 shadow-xl shadow-primary/30">
-                     <ArrowRight className="w-5 h-5 text-white" />
+                   <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 h-10 w-10 sm:h-12 sm:w-12 bg-primary rounded-full flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500 shadow-xl shadow-primary/30">
+                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                    </div>
                  </Link>
                  
-                 <div className="flex flex-col gap-4 px-4">
-                   <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                 <div className="flex flex-col gap-3 sm:gap-4 px-2 sm:px-4">
+                   <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                      <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary" /> {post.date}</span>
                      <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-primary" /> {post.author}</span>
                    </div>
                    <Link href={`/blog/${post.slug}`} className="group-hover:text-primary transition-colors">
-                     <h3 className="text-3xl font-heading font-black tracking-tight leading-[1.1]">
+                     <h3 className="text-2xl sm:text-3xl font-heading font-black tracking-tight leading-[1.1]">
                         {post.title}
                      </h3>
                    </Link>
-                   <p className="text-muted-foreground line-clamp-3 leading-relaxed font-medium">
+                   <p className="text-sm sm:text-base text-muted-foreground line-clamp-3 leading-relaxed font-medium">
                      {post.excerpt}
                    </p>
                    
-                   <Link href={`/blog/${post.slug}`} className="mt-4 flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-primary group-hover:gap-5 transition-all w-fit">
-                      Read Entry <div className="h-[2px] w-8 bg-primary/20 group-hover:w-16 transition-all" />
+                   <Link href={`/blog/${post.slug}`} className="mt-2 flex items-center gap-3 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-primary group-hover:gap-5 transition-all w-fit">
+                      Read Entry <div className="h-[2px] w-6 sm:w-8 bg-primary/20 group-hover:w-12 sm:group-hover:w-16 transition-all" />
                    </Link>
                  </div>
                </motion.div>

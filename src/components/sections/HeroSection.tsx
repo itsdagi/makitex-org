@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { ArrowDownRight } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -16,59 +17,91 @@ const textRevealVariants = {
   }),
 };
 
-const FlipCard = ({ front, back, delay = 0 }: { front: string; back: any; delay?: number }) => {
+const FlipCard = ({ front, back, delay = 0, autoFlipInterval = 5000 }: { front: string; back: any; delay?: number; autoFlipInterval?: number }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      setIsFlipped((prev) => !prev);
+    }, autoFlipInterval + delay * 1000);
+    return () => clearInterval(interval);
+  }, [isHovered, autoFlipInterval, delay]);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, x: 60, rotate: 2 }}
-      animate={{ opacity: 1, x: 0, rotate: 0 }}
+      initial={{ opacity: 0, x: 60, rotateY: 45, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
       transition={{ duration: 1.2, delay: 0.6 + delay, ease: [0.22, 1, 0.36, 1] as any }}
-      className="group relative h-72 md:h-80 w-full perspective-2000 cursor-pointer"
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
+      className="group relative h-80 sm:h-96 md:h-[28rem] w-full perspective-[2000px] cursor-pointer"
+      onMouseEnter={() => { setIsHovered(true); setIsFlipped(true); }}
+      onMouseLeave={() => { setIsHovered(false); setIsFlipped(false); }}
       onClick={() => setIsFlipped(!isFlipped)}
     >
       <motion.div
         className="relative h-full w-full preserve-3d"
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.8, type: "spring", stiffness: 260, damping: 22 }}
+        animate={{ rotateX: isFlipped ? 180 : 0 }}
+        transition={{ duration: 1.2, type: "spring", stiffness: 100, damping: 20 }}
+        style={{ transformStyle: "preserve-3d" }}
       >
-        {/* Front */}
-        <div className="absolute inset-0 backface-hidden rounded-[3.5rem] overflow-hidden shadow-2xl border border-white/5 bg-black">
+        {/* Front Face (Image) */}
+        <div 
+          className="absolute inset-0 backface-hidden rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl bg-black border border-white/10"
+          style={{ backfaceVisibility: "hidden" }}
+        >
           <motion.img 
             src={front} 
             alt="Project" 
-            className="h-full w-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000"
-            whileHover={{ scale: 1.15 }}
+            className="absolute inset-0 h-full w-full object-cover grayscale-[0.2] transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent p-10 flex flex-col justify-end">
-            <h3 className="text-white font-heading font-black text-2xl mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">{back.title}</h3>
-            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] opacity-80">{back.meta}</p>
+          {/* Subtle Glow Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-black/40 to-transparent p-6 sm:p-8 md:p-10 flex flex-col justify-end opacity-90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6 sm:p-8 md:p-10 flex flex-col justify-end z-10">
+            <h3 
+              className="text-white font-heading font-black text-2xl sm:text-3xl md:text-4xl mb-1 translate-y-4 group-hover:translate-y-0 opacity-80 group-hover:opacity-100 transition-all duration-500 ease-out"
+              style={{ transform: "translateZ(30px)" }}
+            >
+              {back.title}
+            </h3>
+            <p className="text-primary text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] opacity-80 shadow-black drop-shadow-md">
+              {back.meta}
+            </p>
           </div>
         </div>
 
-        {/* Back */}
-        <div className="absolute inset-0 backface-hidden [transform:rotateY(180deg)] rounded-[3.5rem] bg-primary p-12 flex flex-col justify-between text-white shadow-2xl overflow-hidden shadow-primary/40">
-           <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-full h-full scale-110">
-                 <path d="M0 20 L100 20 M0 40 L100 40 M0 60 L100 60 M0 80 L100 80 M20 0 L20 100 M40 0 L40 100 M60 0 L60 100 M80 0 L80 100" stroke="white" strokeWidth="0.8" fill="none" />
-              </svg>
-           </div>
+        {/* Back Face (Details + Glassmorphism) */}
+        <div 
+          className="absolute inset-0 backface-hidden rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3.5rem] bg-black/60 p-8 sm:p-10 flex flex-col items-center justify-center text-center text-white border border-white/10 backdrop-blur-[40px] shadow-2xl overflow-hidden group/back"
+          style={{ backfaceVisibility: "hidden", transform: "rotateX(180deg)" }}
+        >
+           {/* Elegant Radial Glow */}
+           <div className="absolute inset-[-50%] bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.25)_0%,transparent_70%)] opacity-0 group-hover/back:opacity-100 transition-opacity duration-1000 pointer-events-none blur-[50px]" />
 
-          <div className="relative z-10">
-            <h4 className="font-heading font-black text-3xl mb-6 leading-tight">{back.title}</h4>
-            <p className="text-sm text-white/95 leading-relaxed font-semibold italic opacity-90">{back.description}</p>
-          </div>
-          
-          <div className="relative z-10 flex justify-between items-end border-t border-white/20 pt-8 mt-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/60">Location</span>
-              <span className="text-[12px] font-black uppercase tracking-widest">{back.location || "Addis Ababa"}</span>
+          <div className="relative z-10 transform-style-3d flex flex-col items-center w-full" style={{ transform: "translateZ(30px)" }}>
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-primary mb-4 opacity-90 drop-shadow-md">
+              {back.location || "Addis Ababa"}
+            </span>
+            
+            <h4 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl leading-[1.1] mb-6 drop-shadow-2xl px-4">{back.title}</h4>
+            
+            <div className="h-[2px] w-12 bg-primary/30 mb-6" />
+            
+            <p className="text-xs sm:text-sm md:text-base text-white/70 leading-relaxed font-medium italic opacity-90 drop-shadow-md line-clamp-3 px-2 max-w-[90%]">
+              {back.description}
+            </p>
+            
+            <div style={{ transform: "translateZ(20px)" }} className="mt-8">
+              <Link 
+                href={`/projects/${back.slug || 'apex-tower'}`}
+                className="group/link flex items-center justify-center h-12 md:h-14 px-8 md:px-10 rounded-full bg-white text-black font-black text-[10px] md:text-xs uppercase tracking-widest transition-all duration-500 hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center gap-2 group-hover/link:text-white transition-colors duration-500 delay-100">
+                  Explore Project <ArrowDownRight className="w-4 h-4 md:w-5 md:h-5 group-hover/link:-rotate-45 transition-transform duration-500" />
+                </span>
+                <div className="absolute inset-0 bg-primary translate-y-full group-hover/link:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+              </Link>
             </div>
-            <Button variant="outline" size="sm" className="bg-white/10 text-white border-white/40 hover:bg-white hover:text-primary transition-all duration-500 rounded-full text-[10px] font-black uppercase tracking-widest h-12 px-8">
-              Explore
-            </Button>
           </div>
         </div>
       </motion.div>
@@ -116,46 +149,47 @@ export const HeroSection = () => {
       <Container className="grid lg:grid-cols-2 gap-24 items-center">
         <motion.div style={{ y: useTransform(scrollYProgress, [0, 0.5], [0, 50]) }} className="flex flex-col gap-10">
           <div className="flex flex-col">
-            <div className="overflow-hidden">
+            <div className="overflow-hidden pb-4">
               <motion.span
                 custom={1}
                 variants={textRevealVariants}
                 initial="hidden"
                 animate="visible"
-                className="inline-block px-5 py-2 rounded-full bg-primary/10 text-primary text-[10px] font-black tracking-[0.4em] uppercase mb-10 border border-primary/20 backdrop-blur-sm"
+                className="inline-block px-5 py-2 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-black tracking-[0.4em] uppercase mb-6 md:mb-10 border border-primary/20 backdrop-blur-sm shadow-xl shadow-primary/5"
               >
                 {heroBadge}
               </motion.span>
             </div>
             
-            <div className="overflow-hidden mb-2">
+            <div className="overflow-visible mb-6">
               <motion.h1
                  key={heroTitle}
                  custom={2}
                  variants={textRevealVariants}
                  initial="hidden"
                  animate="visible"
-                 className="text-7xl md:text-8xl lg:text-[10rem] font-heading font-black tracking-tighter leading-[0.75] uppercase"
+                 className="text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] xl:text-[9.5rem] font-heading font-black tracking-tighter leading-[0.85] uppercase py-2"
               >
-                 {heroTitle.includes('.') ? (
-                   <>
-                     {heroTitle.split('.')[0]}<br />
-                     <span className="text-primary italic">{heroTitle.split('.')[1]}</span>
-                   </>
-                 ) : (
-                   heroTitle
-                 )}
+                 {heroTitle.split(' ').map((word, idx, arr) => (
+                   <span 
+                     key={idx} 
+                     className={idx === arr.length - 1 ? "text-primary italic inline-block" : "inline-block mr-4 md:mr-8"}
+                   >
+                     {word.replace('.', '')}
+                     {idx === arr.length - 1 && '.'}
+                   </span>
+                 ))}
               </motion.h1>
             </div>
             
-            <div className="overflow-hidden mt-8">
+            <div className="overflow-hidden mt-6 md:mt-10">
               <motion.p
                  key={heroDescription}
                  custom={3}
                  variants={textRevealVariants}
                  initial="hidden"
                  animate="visible"
-                 className="max-w-lg text-2xl text-muted-foreground leading-relaxed font-medium"
+                 className="max-w-xl text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed font-medium pl-6 border-l-4 border-primary/40"
               >
                  {heroDescription}
               </motion.p>
@@ -167,18 +201,25 @@ export const HeroSection = () => {
             variants={textRevealVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-wrap items-center gap-8 mt-4"
+            className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-8 sm:gap-12 mt-8 md:mt-12"
           >
-            <Button size="lg" className="h-20 px-12 text-xl font-black rounded-[2rem] group relative overflow-hidden transition-all duration-500 shadow-2xl shadow-primary/30">
-               <span className="relative z-10 flex items-center gap-3">
-                 View Our Projects <ArrowDownRight className="w-6 h-6 group-hover:rotate-45 transition-transform duration-500" />
-               </span>
-               <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-            </Button>
+            <Link href="/projects" className="block w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto h-16 md:h-20 px-8 md:px-12 text-lg md:text-xl font-black rounded-full group relative overflow-hidden transition-all duration-500 shadow-2xl shadow-primary/30 active:scale-95">
+                 <span className="relative z-10 flex items-center justify-center gap-3">
+                   Explore Portfolio <ArrowDownRight className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-45 transition-transform duration-500" />
+                 </span>
+                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+              </Button>
+            </Link>
             
-            <div className="flex flex-col">
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-1">Inquiry Line</span>
-               <span className="text-2xl font-heading font-black">{heroPhone}</span>
+            <div className="flex items-center gap-6 pl-2 sm:pl-6 sm:border-l-2 border-primary/20">
+               <div className="w-12 h-12 rounded-full bg-accent/30 flex items-center justify-center animate-pulse-slow">
+                 <div className="w-3 h-3 rounded-full bg-primary" />
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mb-1">Direct Inquiry</span>
+                 <span className="text-xl md:text-2xl font-heading font-black tracking-tight">{heroPhone}</span>
+               </div>
             </div>
           </motion.div>
         </motion.div>
@@ -187,11 +228,11 @@ export const HeroSection = () => {
           <div className="space-y-10">
             <FlipCard 
               front="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800"
-              back={{ title: "Apex Tower", description: "Glass-sheathed commercial skyscraper redefined for the 21st century.", meta: "Landmark Project" }}
+              back={{ title: "Apex Tower", description: "Glass-sheathed commercial skyscraper redefined for the 21st century.", meta: "Landmark Project", slug: "apex-tower", location: "Kazanchis" }}
             />
             <FlipCard 
               front="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800"
-              back={{ title: "Bole Estate", description: "Minimalist luxury residential villas with private courtyards and smart automation.", meta: "Exclusive Living" }}
+              back={{ title: "Bole Estate", description: "Minimalist luxury residential villas with private courtyards and smart automation.", meta: "Exclusive Living", slug: "bole-luxury-estate", location: "Bole Sub-city" }}
               delay={0.2}
             />
           </div>
@@ -201,7 +242,7 @@ export const HeroSection = () => {
           >
             <FlipCard 
               front="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800"
-              back={{ title: "Grand Atrium", description: "A multi-use public space bridging modern architecture with sustainable landscape.", meta: "Civil Work" }}
+              back={{ title: "Grand Atrium", description: "A multi-use public space bridging modern architecture with sustainable landscape.", meta: "Civil Work", slug: "grand-atrium", location: "Sarbet" }}
               delay={0.4}
             />
             <div className="h-80 bg-accent/20 rounded-[3.5rem] border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-10 text-center backdrop-blur-md group hover:border-primary/50 transition-colors">

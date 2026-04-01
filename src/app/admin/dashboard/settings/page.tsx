@@ -24,13 +24,43 @@ export default function SettingsManager() {
     fetchSettings();
   }, []);
 
+  const defaultSettings = [
+    { key: "hero_badge", value: "Pioneering the Urban Horizon", category: "hero" },
+    { key: "hero_title", value: "Design Beyond Build.", category: "hero" },
+    { key: "hero_description", value: "Makitex Trading PLC integrates cutting-edge architecture with industrial-grade construction to deliver timeless masterpieces.", category: "hero" },
+    { key: "hero_phone", value: "+251 911 234 567", category: "hero" },
+    { key: "about_title", value: "A Legacy Built on Concrete Promises.", category: "about" },
+    { key: "about_content", value: "We are more than contractors...", category: "about" },
+    { key: "contact_email", value: "hello@makitex.com", category: "contact" },
+    { key: "contact_address", value: "Bole Sub-city, Addis Ababa, Ethiopia", category: "contact" },
+    { key: "social_linkedin", value: "https://linkedin.com/company/makitex", category: "social" },
+    { key: "social_twitter", value: "https://twitter.com/makitex", category: "social" },
+    { key: "social_instagram", value: "https://instagram.com/makitex", category: "social" },
+  ];
+
   async function fetchSettings() {
     setLoading(true);
     const { data, error } = await supabase
       .from("site_settings")
       .select("*");
     
-    if (data) setSettings(data);
+    if (data && data.length > 0) {
+      // Auto-merge missing keys
+      const existingKeys = data.map(d => d.key);
+      const missing = defaultSettings.filter(ds => !existingKeys.includes(ds.key));
+      
+      if (missing.length > 0) {
+        await supabase.from("site_settings").insert(missing);
+        const { data: updatedData } = await supabase.from("site_settings").select("*");
+        if (updatedData) setSettings(updatedData);
+      } else {
+        setSettings(data);
+      }
+    } else if (data?.length === 0) {
+       // Seed if completely empty
+       await supabase.from("site_settings").insert(defaultSettings);
+       setSettings(defaultSettings as any);
+    }
     setLoading(false);
   }
 
@@ -61,7 +91,8 @@ export default function SettingsManager() {
   const categories = [
     { id: "hero", name: "Landing Page", icon: Globe },
     { id: "about", name: "About Section", icon: Info },
-    { id: "contact", name: "Corporate Info", icon: Phone }
+    { id: "contact", name: "Corporate Info", icon: Phone },
+    { id: "social", name: "Social Media", icon: Globe } // Share icon would be better but globe is imported
   ];
 
   const filteredSettings = settings.filter(s => s.category === activeCategory);
