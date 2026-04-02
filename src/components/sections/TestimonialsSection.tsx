@@ -11,37 +11,32 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 
-const CLIENT_LOGOS = [
-  "ZEMEN BANK",
-  "ETHIO TELECOM",
-  "AFRICAN UNION",
-  "BGI ETHIOPIA",
-  "MIDROC",
-  "NBE"
-];
 
 export const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchTestimonials() {
-      const { data } = await supabase
-        .from("testimonials")
-        .select("*")
-        .order("display_order", { ascending: true });
-      if (data && data.length > 0) {
-        setTestimonials(data);
-      } else {
-        // Fallback for demo if no data
-        setTestimonials([
-          { id: 1, name: "Elias Solomon", role: "CEO, Zemen Bank", content: "Makitex delivered our headquarters ahead of schedule with craftsmanship that exceeded our international benchmarks.", rating: 5 },
-          { id: 2, name: "Sara Bekele", role: "Lead Architect", content: "The attention to detail and ability to handle complex structural challenges makes them our go-to partner.", rating: 5 },
-          { id: 3, name: "Aman T.", role: "Operations Director", content: "Their commitment to safety and sustainable practices completely changed our industrial park facade.", rating: 5 },
-        ]);
-      }
+    async function fetchAll() {
+      const [{ data: tData }, { data: pData }] = await Promise.all([
+        supabase.from("testimonials").select("*").order("display_order", { ascending: true }),
+        supabase.from("partners").select("*").order("display_order", { ascending: true }),
+      ]);
+      if (tData && tData.length > 0) setTestimonials(tData);
+      else setTestimonials([
+        { id: 1, author: "Elias Solomon", role: "CEO, Zemen Bank", content: "Makitex delivered our headquarters ahead of schedule with craftsmanship that exceeded our international benchmarks.", rating: 5 },
+        { id: 2, author: "Sara Bekele", role: "Lead Architect", content: "The attention to detail and ability to handle complex structural challenges makes them our go-to partner.", rating: 5 },
+        { id: 3, author: "Aman T.", role: "Operations Director", content: "Their commitment to safety and sustainable practices completely changed our industrial park facade.", rating: 5 },
+      ]);
+      if (pData && pData.length > 0) setPartners(pData);
+      else setPartners([
+        { id: 1, name: "Zemen Bank" }, { id: 2, name: "Ethio Telecom" },
+        { id: 3, name: "African Union" }, { id: 4, name: "BGI Ethiopia" },
+        { id: 5, name: "Midroc" }, { id: 6, name: "NBE" }
+      ]);
     }
-    fetchTestimonials();
+    fetchAll();
   }, []);
 
   return (
@@ -96,13 +91,13 @@ export const TestimonialsSection = () => {
                     <div className="relative">
                       <div className="absolute inset-0 bg-primary/20 blur-md rounded-full transform group-hover:scale-125 transition-transform duration-500" />
                       <img 
-                        src={t.image_url || `https://i.pravatar.cc/150?u=${t.id}`} 
-                        alt={t.name} 
+                        src={t.image_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.author || t.name || 'A')}&background=random`} 
+                        alt={t.author || t.name} 
                         className="w-16 h-16 rounded-full border-4 border-background relative z-10 grayscale group-hover:grayscale-0 transition-all duration-500 object-cover" 
                       />
                     </div>
                     <div>
-                      <h4 className="font-heading font-black text-xl group-hover:text-primary transition-colors uppercase">{t.name}</h4>
+                      <h4 className="font-heading font-black text-xl group-hover:text-primary transition-colors uppercase">{t.author || t.name}</h4>
                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em] mt-1">{t.role}</p>
                     </div>
                   </div>
@@ -112,12 +107,16 @@ export const TestimonialsSection = () => {
           </Swiper>
         </div>
 
-        {/* Client Logos Stripe */}
+        {/* Partner Logos Ticker — fully dynamic */}
         <div className="border-y border-primary/10 py-10 relative overflow-hidden bg-accent/5">
-          <div className="flex gap-16 min-w-max animate-spin-slow" style={{ animation: "scroll 30s linear infinite" }}>
-            {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((logo, index) => (
+          <div className="flex gap-16 min-w-max" style={{ animation: "scroll 30s linear infinite" }}>
+            {[...partners, ...partners].map((p, index) => (
                <div key={index} className="text-2xl font-heading font-black uppercase tracking-[0.3em] text-muted-foreground/30 hover:text-primary transition-colors cursor-default select-none flex items-center gap-16">
-                 {logo}
+                 {p.logo_url ? (
+                   <img src={p.logo_url} alt={p.name} className="h-8 object-contain opacity-40 hover:opacity-100 transition-opacity" />
+                 ) : (
+                   <span>{p.name}</span>
+                 )}
                  <span className="w-2 h-2 rounded-full bg-primary/30" />
                </div>
             ))}

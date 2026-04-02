@@ -8,40 +8,19 @@ import { Calendar, User, ArrowRight, Tag, Bookmark } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
-const allPosts = [
-  { 
-    id: 1, 
-    title: "The Future of Sustainable Construction in Ethiopia", 
-    slug: "future-sustainable-construction", 
-    excerpt: "Exploring how local materials and modern engineering are redefining urban living in Addis Ababa.",
-    cat: "Innovation", 
-    date: "March 15, 2026", 
-    author: "Eng. Samuel K.", 
-    img: "https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=800" 
-  },
-  { 
-    id: 2, 
-    title: "10 Principles of High-Performance Modern Homes", 
-    slug: "modern-homes-principles", 
-    excerpt: "What makes a modern residence truly 'high-performance'? From thermal mass to smart automation.",
-    cat: "Design", 
-    date: "Feb 28, 2026", 
-    author: "Ark. Helen T.", 
-    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800" 
-  },
-  { 
-    id: 3, 
-    title: "Navigating Complex Infrastructure Projects", 
-    slug: "navigating-infrastructure", 
-    excerpt: "A deep dive into the logistical and engineering challenges of our most ambitious span projects.",
-    cat: "Engineering", 
-    date: "Jan 12, 2026", 
-    author: "Eng. Elias W.", 
-    img: "https://images.unsplash.com/photo-1513360309081-38f0d12739a7?q=80&w=800"
-  },
-];
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function BlogPage() {
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      const { data } = await supabase.from("blogs").select("*").eq("published", true).order("created_at", { ascending: false });
+      if (data) setAllPosts(data);
+    }
+    fetchPosts();
+  }, []);
   return (
     <main className="bg-background pt-32 min-h-screen">
       <Navbar />
@@ -96,13 +75,13 @@ export default function BlogPage() {
                >
                  <Link href={`/blog/${post.slug}`} className="relative h-64 sm:h-80 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5">
                    <img 
-                      src={post.img} 
+                      src={post.image_url || "https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=800"} 
                       alt={post.title} 
                       className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" 
                    />
                    <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
                      <span className="px-4 py-2 sm:px-5 sm:py-2 bg-background/80 backdrop-blur-md rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-primary border border-primary/20">
-                        {post.cat}
+                        {post.category || "Article"}
                      </span>
                    </div>
                    <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 h-10 w-10 sm:h-12 sm:w-12 bg-primary rounded-full flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500 shadow-xl shadow-primary/30">
@@ -112,8 +91,8 @@ export default function BlogPage() {
                  
                  <div className="flex flex-col gap-3 sm:gap-4 px-2 sm:px-4">
                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                     <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary" /> {post.date}</span>
-                     <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-primary" /> {post.author}</span>
+                     <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary" /> {new Date(post.created_at).toLocaleDateString()}</span>
+                     <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-primary" /> {post.author || 'Admin'}</span>
                    </div>
                    <Link href={`/blog/${post.slug}`} className="group-hover:text-primary transition-colors">
                      <h3 className="text-2xl sm:text-3xl font-heading font-black tracking-tight leading-[1.1]">

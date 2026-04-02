@@ -9,10 +9,11 @@ import Link from "next/link";
 
 interface Testimonial {
   id: string;
-  name: string;
+  author: string;
   role: string;
   content: string;
-  rating: number;
+  image_url: string;
+  display_order: number;
 }
 
 export default function TestimonialsManager() {
@@ -38,10 +39,10 @@ export default function TestimonialsManager() {
 
   async function addTestimonial() {
     const newTestimonial = {
-      name: "Guest Name",
-      role: "Client / Architect / CEO",
-      content: "Amazing work, very professional and efficient.",
-      rating: 5,
+      author: "Client Name",
+      role: "Title / Company",
+      content: "Share their experience with Makitex here.",
+      image_url: "",
       display_order: testimonials.length + 1
     };
 
@@ -107,8 +108,8 @@ export default function TestimonialsManager() {
               exit={{ opacity: 0, scale: 0.9 }}
               className={`p-10 rounded-[3.5rem] border transition-all duration-500 flex flex-col ${
                 editingId === testimonial.id 
-                ? "bg-white border-primary shadow-2xl scale-[1.02]" 
-                : "bg-accent/30 border-primary/5 hover:bg-white"
+                ? "bg-zinc-900 text-white border-primary shadow-2xl scale-[1.02]" 
+                : "bg-zinc-950 text-white border-zinc-800 hover:border-primary/40"
               }`}
             >
               {editingId === testimonial.id ? (
@@ -117,25 +118,36 @@ export default function TestimonialsManager() {
                     <div className="space-y-4">
                       <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Client Name</label>
                       <input 
-                        className="w-full bg-accent/50 p-6 rounded-2xl border-none outline-none font-black uppercase"
-                        value={testimonial.name}
-                        onChange={(e) => setTestimonials(testimonials.map(t => t.id === testimonial.id ? {...t, name: e.target.value} : t))}
+                        className="w-full bg-zinc-800 text-white p-5 rounded-2xl border-none outline-none font-black uppercase"
+                        value={testimonial.author}
+                        onChange={(e) => setTestimonials(testimonials.map(t => t.id === testimonial.id ? {...t, author: e.target.value} : t))}
                       />
                     </div>
                     <div className="space-y-4">
                       <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Job Role</label>
                       <input 
-                        className="w-full bg-accent/50 p-6 rounded-2xl border-none outline-none font-medium"
+                        className="w-full bg-zinc-800 text-white p-5 rounded-2xl border-none outline-none font-medium"
                         value={testimonial.role}
                         onChange={(e) => setTestimonials(testimonials.map(t => t.id === testimonial.id ? {...t, role: e.target.value} : t))}
                       />
                     </div>
                   </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Photo URL (Optional)</label>
+                    <input
+                      type="url"
+                      className="w-full bg-zinc-800 text-white p-5 rounded-2xl border-none outline-none font-medium"
+                      placeholder="https://..."
+                      value={testimonial.image_url || ""}
+                      onChange={(e) => setTestimonials(testimonials.map(t => t.id === testimonial.id ? {...t, image_url: e.target.value} : t))}
+                    />
+                  </div>
                   
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Testimonial Content</label>
                     <textarea 
-                      className="w-full bg-accent/50 p-6 rounded-2xl border-none outline-none font-medium h-32 italic"
+                      className="w-full bg-zinc-800 text-white p-5 rounded-2xl border-none outline-none font-medium h-32 italic"
                       value={testimonial.content}
                       onChange={(e) => setTestimonials(testimonials.map(t => t.id === testimonial.id ? {...t, content: e.target.value} : t))}
                     />
@@ -175,17 +187,21 @@ export default function TestimonialsManager() {
                     </div>
                   </div>
                   
-                  <blockquote className="text-xl italic font-medium leading-relaxed mb-8 opacity-90">&quot;{testimonial.content}&quot;</blockquote>
+                  <blockquote className="text-lg italic font-medium leading-relaxed mb-6 opacity-90 text-white">&quot;{testimonial.content}&quot;</blockquote>
                   
-                  <div className="mt-auto pt-8 border-t border-primary/10 flex justify-between items-center">
-                    <div className="flex flex-col">
-                       <span className="text-xl font-heading font-black uppercase">{testimonial.name}</span>
-                       <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{testimonial.role}</span>
-                    </div>
-                    <div className="flex gap-1">
-                       {[...Array(testimonial.rating)].map((_, i) => (
-                         <Star key={i} className="w-3 h-3 fill-primary text-primary" />
-                       ))}
+                  <div className="mt-auto pt-6 border-t border-zinc-700 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                       {testimonial.image_url ? (
+                         <img src={testimonial.image_url} alt={testimonial.author} className="w-12 h-12 rounded-full object-cover border-2 border-primary/30" />
+                       ) : (
+                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black text-xl">
+                           {(testimonial.author || '?')[0]}
+                         </div>
+                       )}
+                       <div className="flex flex-col">
+                          <span className="text-xl font-heading font-black uppercase text-white">{testimonial.author}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-primary/70">{testimonial.role}</span>
+                       </div>
                     </div>
                   </div>
                 </div>

@@ -106,8 +106,8 @@ export default function ServicesManager() {
               exit={{ opacity: 0, scale: 0.9 }}
               className={`p-10 rounded-[3rem] border transition-all duration-500 ${
                 editingId === service.id 
-                ? "bg-white border-primary shadow-2xl scale-[1.02]" 
-                : "bg-accent/30 border-primary/5 hover:bg-white"
+                ? "bg-zinc-900 text-white border-primary shadow-2xl scale-[1.02]" 
+                : "bg-zinc-950 text-white border-zinc-800 hover:border-primary/40"
               }`}
             >
               {editingId === service.id ? (
@@ -115,7 +115,7 @@ export default function ServicesManager() {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Service Title</label>
                     <input 
-                      className="w-full bg-accent/50 p-6 rounded-2xl border-none outline-none font-heading font-black uppercase text-xl"
+                      className="w-full bg-zinc-800 text-white p-6 rounded-2xl border-none outline-none font-heading font-black uppercase text-xl"
                       value={service.title}
                       onChange={(e) => setServices(services.map(s => s.id === service.id ? {...s, title: e.target.value} : s))}
                     />
@@ -124,10 +124,23 @@ export default function ServicesManager() {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Description</label>
                     <textarea 
-                      className="w-full bg-accent/50 p-6 rounded-2xl border-none outline-none font-medium h-32"
+                      className="w-full bg-zinc-800 text-white p-6 rounded-2xl border-none outline-none font-medium h-32"
                       value={service.description}
                       onChange={(e) => setServices(services.map(s => s.id === service.id ? {...s, description: e.target.value} : s))}
                     />
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-2">Icon Name</label>
+                    <select
+                      className="w-full bg-zinc-800 text-white p-4 rounded-2xl border-none outline-none font-medium appearance-none"
+                      value={service.icon}
+                      onChange={(e) => setServices(services.map(s => s.id === service.id ? {...s, icon: e.target.value} : s))}
+                    >
+                      {["Building2","Ruler","Paintbrush","FileCheck","HardHat","Hammer","Pencil","Layout","Trees"].map(ic => (
+                        <option key={ic} value={ic}>{ic}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="flex gap-4">

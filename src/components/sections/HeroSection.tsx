@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowDownRight } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
+import { supabase } from "@/lib/supabase";
 
 const textRevealVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -93,7 +94,7 @@ const FlipCard = ({ front, back, delay = 0, autoFlipInterval = 5000 }: { front: 
             
             <div style={{ transform: "translateZ(20px)" }} className="mt-8">
               <Link 
-                href={`/projects/${back.slug || 'apex-tower'}`}
+                href={`/portfolio/${back.slug || 'apex-tower'}`}
                 className="group/link flex items-center justify-center h-12 md:h-14 px-8 md:px-10 rounded-full bg-white text-black font-black text-[10px] md:text-xs uppercase tracking-widest transition-all duration-500 hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-2 group-hover/link:text-white transition-colors duration-500 delay-100">
@@ -115,10 +116,26 @@ export const HeroSection = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const { settings, loading } = useSettings();
 
+  const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("featured", true)
+        .order("display_order", { ascending: true })
+        .limit(3);
+      if (data) setFeaturedProjects(data);
+    }
+    fetchFeatured();
+  }, []);
+
   const heroBadge = settings.hero_badge || "Pioneering the Urban Horizon";
   const heroTitle = settings.hero_title || "Design Beyond Build.";
   const heroDescription = settings.hero_description || "Makitex Trading PLC integrates cutting-edge architecture with industrial-grade construction to deliver timeless masterpieces.";
-  const heroPhone = settings.hero_phone || "+251 911 234 567";
+   const heroPhone1 = settings.hero_phone || "+251 71 485 7133";
+  const heroPhone2 = settings.hero_phone2 || "+251 91 326 4556";
 
   return (
     <section className="relative min-h-[110vh] flex items-center overflow-hidden bg-background pt-32 pb-40">
@@ -203,49 +220,42 @@ export const HeroSection = () => {
             animate="visible"
             className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-8 sm:gap-12 mt-8 md:mt-12"
           >
-            <Link href="/projects" className="block w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-16 md:h-20 px-8 md:px-12 text-lg md:text-xl font-black rounded-full group relative overflow-hidden transition-all duration-500 shadow-2xl shadow-primary/30 active:scale-95">
-                 <span className="relative z-10 flex items-center justify-center gap-3">
-                   Explore Portfolio <ArrowDownRight className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-45 transition-transform duration-500" />
-                 </span>
-                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-              </Button>
-            </Link>
-            
-            <div className="flex items-center gap-6 pl-2 sm:pl-6 sm:border-l-2 border-primary/20">
+            <div className="flex items-center gap-6 pl-2 sm:pl-6 border-l-4 border-primary/20">
                <div className="w-12 h-12 rounded-full bg-accent/30 flex items-center justify-center animate-pulse-slow">
                  <div className="w-3 h-3 rounded-full bg-primary" />
                </div>
-               <div className="flex flex-col">
+               <div className="flex flex-col gap-0.5">
                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mb-1">Direct Inquiry</span>
-                 <span className="text-xl md:text-2xl font-heading font-black tracking-tight">{heroPhone}</span>
+                 <a href="tel:+251714857133" className="text-lg md:text-xl font-heading font-black tracking-tight hover:text-primary transition-colors">{heroPhone1}</a>
+                 <a href="tel:+251913264556" className="text-lg md:text-xl font-heading font-black tracking-tight hover:text-primary transition-colors">{heroPhone2}</a>
                </div>
             </div>
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-10 items-center">
-          <div className="space-y-10">
-            <FlipCard 
-              front="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800"
-              back={{ title: "Apex Tower", description: "Glass-sheathed commercial skyscraper redefined for the 21st century.", meta: "Landmark Project", slug: "apex-tower", location: "Kazanchis" }}
-            />
-            <FlipCard 
-              front="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800"
-              back={{ title: "Bole Estate", description: "Minimalist luxury residential villas with private courtyards and smart automation.", meta: "Exclusive Living", slug: "bole-luxury-estate", location: "Bole Sub-city" }}
-              delay={0.2}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-10 items-center w-full">
+          <div className="space-y-10 w-full min-w-[280px]">
+            {featuredProjects.slice(0, 2).map((p, idx) => (
+              <FlipCard 
+                key={p.id}
+                front={p.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800"}
+                back={{ title: p.title, description: p.description, meta: p.category || 'Featured', slug: p.slug, location: p.location }}
+                delay={idx * 0.2}
+              />
+            ))}
           </div>
           <motion.div 
             style={{ y: useTransform(scrollYProgress, [0, 1], [0, -150]) }}
-            className="hidden xl:flex flex-col gap-10 mt-32"
+            className="hidden xl:flex flex-col gap-10 mt-32 w-full min-w-[280px]"
           >
-            <FlipCard 
-              front="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800"
-              back={{ title: "Grand Atrium", description: "A multi-use public space bridging modern architecture with sustainable landscape.", meta: "Civil Work", slug: "grand-atrium", location: "Sarbet" }}
-              delay={0.4}
-            />
-            <div className="h-80 bg-accent/20 rounded-[3.5rem] border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-10 text-center backdrop-blur-md group hover:border-primary/50 transition-colors">
+            {featuredProjects[2] && (
+              <FlipCard 
+                front={featuredProjects[2].image_url || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800"}
+                back={{ title: featuredProjects[2].title, description: featuredProjects[2].description, meta: featuredProjects[2].category || 'Portfolio', slug: featuredProjects[2].slug, location: featuredProjects[2].location }}
+                delay={0.4}
+              />
+            )}
+            <div className="h-80 bg-accent/20 rounded-[3.5rem] border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-10 text-center backdrop-blur-md group hover:border-primary/50 transition-colors shadow-sm cursor-pointer">
                <motion.span 
                  animate={{ scale: [1, 1.1, 1] }}
                  transition={{ duration: 3, repeat: Infinity }}

@@ -18,9 +18,27 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) {
-      router.push("/admin");
+      if (email === "dagimalemux@gmail.com") {
+        router.push("/admin");
+      } else {
+        alert("Account created/logged in successfully! However, you do not have admin privileges.");
+        setLoading(false);
+      }
+    } else {
+      alert(error.message);
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (!error) {
+      alert("Sign up successful! You can now log in.");
+      setLoading(false);
     } else {
       alert(error.message);
       setLoading(false);
@@ -70,16 +88,28 @@ export default function AdminLogin() {
             </div>
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="w-full h-20 rounded-3xl text-xl font-black uppercase tracking-widest shadow-xl shadow-primary/20"
-          >
-            {loading ? "Authenticating..." : "Access Dashboard"}
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              type="submit" 
+              onClick={handleLogin}
+              disabled={loading}
+              className="flex-1 h-20 rounded-3xl text-xl font-black uppercase tracking-widest shadow-xl shadow-primary/20"
+            >
+              {loading ? "..." : "Sign In"}
+            </Button>
+            <Button 
+              type="button" 
+              onClick={handleSignUp}
+              disabled={loading}
+              variant="outline"
+              className="flex-1 h-20 rounded-3xl text-xl font-black uppercase tracking-widest"
+            >
+              Sign Up
+            </Button>
+          </div>
           
-          <p className="text-center text-[10px] text-muted-foreground uppercase font-black tracking-[0.2em] mt-4 opacity-50">
-            For Authorized Makitex Personnel Only
+          <p className="text-center text-[10px] text-muted-foreground uppercase font-black tracking-[0.2em] mt-4 opacity-70">
+            System requires Admin Verification
           </p>
         </form>
       </motion.div>

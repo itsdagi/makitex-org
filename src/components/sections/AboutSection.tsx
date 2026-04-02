@@ -10,7 +10,7 @@ import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 export const AboutSection = () => {
   const { settings, loading } = useSettings();
   const aboutTitle = settings.about_title || "Building the Future of Ethiopia.";
-  const aboutDescription = settings.about_description || "Founded on the principles of integrity and excellence, Makitex Trading PLC has grown to become a leader in the design and construction industry. We bridge the gap between architectural imagination and physical reality.";
+  const aboutDescription = settings.about_content || "Founded on the principles of integrity and excellence, Makitex Trading PLC has grown to become a leader in the design and construction industry. We bridge the gap between architectural imagination and physical reality.";
 
   const highlights = [
     "Design & Build Integration",

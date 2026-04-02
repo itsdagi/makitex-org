@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -19,13 +19,22 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { BlogEditorModal } from "@/components/admin/BlogEditorModal";
 
-const allPosts = [
-  { id: 1, title: "The Future of Sustainable Construction", status: "Published", author: "Eng. Samuel K.", views: "1.2k", date: "Mar 15, 2026" },
-  { id: 2, title: "10 Principles of High-Performance Modern Homes", status: "Draft", author: "Ark. Helen T.", views: "-", date: "Feb 28, 2026" },
-  { id: 3, title: "Navigating Complex Infrastructure Projects", status: "Published", author: "Eng. Elias W.", views: "840", date: "Jan 12, 2026" },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function AdminBlogPage() {
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(true);
+
+  const fetchPosts = async () => {
+    setFetchLoading(true);
+    const { data } = await supabase.from("blogs").select("*").order("created_at", { ascending: false });
+    if (data) setAllPosts(data);
+    setFetchLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
   const [search, setSearch] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<any>(null);
@@ -58,7 +67,7 @@ export default function AdminBlogPage() {
       </header>
 
       {/* Filter and Search Bar */}
-      <section className="flex flex-col md:flex-row justify-between items-center gap-8 bg-white p-6 rounded-[2rem] border border-primary/5 shadow-sm">
+      <section className="flex flex-col md:flex-row justify-between items-center gap-8 bg-zinc-950 text-white p-6 rounded-[2rem] border border-zinc-800 shadow-sm">
          <div className="flex flex-wrap items-center gap-4 p-1 bg-accent/20 rounded-xl border">
             {["All", "Published", "Drafts", "Archived"].map(t => (
                <button key={t} className="px-8 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all hover:bg-background">
@@ -100,11 +109,11 @@ export default function AdminBlogPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
-              className="group grid grid-cols-12 gap-4 p-8 bg-white border border-primary/5 rounded-[2.5rem] items-center hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-500"
+              className="group grid grid-cols-12 gap-4 p-8 bg-zinc-950 text-white border border-zinc-800 rounded-[2.5rem] items-center hover:shadow-xl hover:shadow-primary/5 hover:border-primary/50 transition-all duration-500"
             >
-              <div className="col-span-5 flex items-center gap-6">
+               <div className="col-span-5 flex items-center gap-6">
                  <div className="w-16 h-16 rounded-2xl bg-accent overflow-hidden shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=200" className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" />
+                    <img src={post.image_url || "https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=200"} className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" />
                  </div>
                  <div className="flex flex-col">
                     <h4 className="text-lg font-heading font-black uppercase group-hover:text-primary transition-colors">{post.title}</h4>
@@ -114,27 +123,34 @@ export default function AdminBlogPage() {
               
               <div className="col-span-2 flex justify-center">
                  <span className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                   post.status === "Published" ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
+                   post.published ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
                  }`}>
-                    {post.status === "Published" ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                    {post.status}
+                    {post.published ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                    {post.published ? "Published" : "Draft"}
                  </span>
               </div>
               
               <div className="col-span-2 text-center flex flex-col items-center">
-                 <span className="text-xl font-heading font-black">{post.views}</span>
+                 <span className="text-xl font-heading font-black">{post.views || '0'}</span>
                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Views</span>
               </div>
               
               <div className="col-span-2 text-center">
-                 <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">{post.date}</span>
+                 <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">{new Date(post.created_at).toLocaleDateString()}</span>
               </div>
               
               <div className="col-span-1 flex justify-end gap-2">
                  <Button onClick={() => handleEdit(post)} variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-primary hover:text-white transition-all">
                     <Edit2 className="w-4 h-4" />
                  </Button>
-                 <Button variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-destructive hover:text-white hover:border-destructive transition-all">
+                 <Button 
+                   onClick={async () => {
+                     if (confirm("Are you sure?")) {
+                       await supabase.from("blogs").delete().eq("id", post.id);
+                       fetchPosts();
+                     }
+                   }}
+                   variant="outline" className="h-12 w-12 p-0 rounded-xl border-primary/5 hover:bg-destructive hover:text-white hover:border-destructive transition-all">
                     <Trash2 className="w-4 h-4" />
                  </Button>
               </div>
@@ -159,7 +175,7 @@ export default function AdminBlogPage() {
         isOpen={isEditorOpen} 
         onClose={() => setIsEditorOpen(false)} 
         postToEdit={postToEdit} 
-        onSave={() => console.log("Refresh list")}
+        onSave={() => fetchPosts()}
       />
     </div>
   );

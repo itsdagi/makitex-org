@@ -46,10 +46,13 @@ export const QuoteModal = ({ isOpen, onClose }: QuoteModalProps) => {
     email: "",
     phone: "",
     project_type: "",
+    custom_interest: "",
     budget: "",
     timeline: "",
     details: "",
   });
+
+  const isOther = formData.project_type === "Other";
 
   const supabase = createClient();
 
@@ -77,7 +80,11 @@ export const QuoteModal = ({ isOpen, onClose }: QuoteModalProps) => {
   };
 
   const isStepValid = () => {
-    if (step === 1) return !!formData.project_type;
+    if (step === 1) {
+      if (!formData.project_type) return false;
+      if (formData.project_type === "Other" && !formData.custom_interest.trim()) return false;
+      return true;
+    }
     if (step === 2) return !!formData.budget && !!formData.timeline && !!formData.details;
     if (step === 3) return !!formData.name && !!formData.email;
     return true;
@@ -149,7 +156,7 @@ export const QuoteModal = ({ isOpen, onClose }: QuoteModalProps) => {
                     {PROJECT_TYPES.map((type) => (
                       <button
                         key={type}
-                        onClick={() => setFormData({ ...formData, project_type: type })}
+                        onClick={() => setFormData({ ...formData, project_type: type, custom_interest: type === "Other" ? formData.custom_interest : "" })}
                         className={`p-4 text-left border rounded-xl transition-all ${
                           formData.project_type === type
                             ? "border-primary bg-primary/5 shadow-inner"
@@ -160,6 +167,23 @@ export const QuoteModal = ({ isOpen, onClose }: QuoteModalProps) => {
                       </button>
                     ))}
                   </div>
+
+                  {isOther && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="overflow-hidden"
+                    >
+                      <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Describe Your Interest</label>
+                      <textarea
+                        autoFocus
+                        className="w-full p-4 border rounded-xl bg-background outline-none focus:border-primary transition-colors min-h-[100px] resize-none"
+                        placeholder="Tell us what you have in mind — we're here for any idea..."
+                        value={formData.custom_interest}
+                        onChange={(e) => setFormData({ ...formData, custom_interest: e.target.value })}
+                      />
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 

@@ -11,17 +11,22 @@ import {
   Image as ImageIcon, 
   Settings, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Users,
+  Building2
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/utils/cn";
 
 const menuItems = [
   { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Projects", href: "/admin/projects", icon: Briefcase },
+  { name: "Portfolio", href: "/admin/projects", icon: Briefcase },
   { name: "Journal/Blog", href: "/admin/blog", icon: FileText },
+  { name: "Testimonials", href: "/admin/dashboard/testimonials", icon: Users },
+  { name: "Partners", href: "/admin/partners", icon: Building2 },
   { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
   { name: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
+  { name: "Job Board", href: "/admin/jobs", icon: Briefcase },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

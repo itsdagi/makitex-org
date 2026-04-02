@@ -3,6 +3,7 @@
 import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/ui/Logo";
 import { ArrowUp } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 
 const Instagram = (props: any) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -34,6 +35,14 @@ export const Footer = () => {
   };
 
   const currentYear = new Date().getFullYear();
+  const { settings } = useSettings();
+
+  const socials = [
+    { Icon: Instagram, link: settings.social_instagram || "#" },
+    { Icon: Facebook, link: settings.social_facebook || "#" },
+    { Icon: Linkedin, link: settings.social_linkedin || "#" },
+    { Icon: Twitter, link: settings.social_twitter || "#" }
+  ];
 
   return (
     <footer className="py-24 bg-accent/20 border-t border-primary/5 relative overflow-hidden">
@@ -47,8 +56,8 @@ export const Footer = () => {
           </p>
           
           <div className="flex gap-4 mt-12">
-             {[Instagram, Facebook, Linkedin, Twitter].map((Icon, i) => (
-               <a key={i} href="#" className="w-14 h-14 rounded-2xl bg-background flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 hover:-translate-y-2 shadow-sm shadow-primary/5">
+             {socials.map(({ Icon, link }, i) => (
+               <a key={i} href={link} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-2xl bg-background flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 hover:-translate-y-2 shadow-sm shadow-primary/5">
                  <Icon className="w-6 h-6" />
                </a>
              ))}
@@ -72,11 +81,11 @@ export const Footer = () => {
            <div className="flex flex-col gap-8">
               <div className="flex flex-col gap-2">
                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Location</p>
-                 <p className="font-heading font-black text-xl">Addis Ababa, <br /> Bole Sub-city, Ethiopia</p>
+                 <p className="font-heading font-black text-lg">Adwa Bridge Road, <br />Nati Irb Bldg, 3rd Floor,<br />Addis Ababa, Ethiopia</p>
               </div>
               <div className="flex flex-col gap-2">
                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Inquiries</p>
-                 <p className="font-heading font-black text-xl">info@makitex.com <br /> +251 911 234 567</p>
+                 <p className="font-heading font-black text-base leading-relaxed">makitextrading@gmail.com<br />+251 71 485 7133<br />+251 91 326 4556</p>
               </div>
            </div>
            

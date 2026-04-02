@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 const stats = [
-  { name: "Total Projects", value: "48", icon: Briefcase, change: "+3", trend: "up" },
+  { name: "Total Portfolio", value: "48", icon: Briefcase, change: "+3", trend: "up" },
   { name: "Blog Posts", value: "12", icon: FileText, change: "+1", trend: "up" },
   { name: "Page Views", value: "4.2K", icon: Eye, change: "+12%", trend: "up" },
   { name: "New Inquiries", value: "8", icon: Users, change: "0", trend: "neutral" },
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           </Button>
           <Button className="h-16 px-10 rounded-2xl flex items-center gap-3 bg-primary text-white shadow-xl shadow-primary/20 hover:scale-105 transition-all">
              <Plus className="w-5 h-5" />
-             <span className="text-[11px] font-black uppercase tracking-widest leading-none">Create Project</span>
+             <span className="text-[11px] font-black uppercase tracking-widest leading-none">Create Portfolio</span>
           </Button>
         </div>
       </header>
@@ -50,7 +50,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1, duration: 0.8 }}
-            className="group p-8 bg-white border border-primary/5 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
+            className="group p-8 bg-zinc-950 text-white border border-zinc-800 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
           >
             <div className="flex justify-between items-start mb-8">
                <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center group-hover:bg-primary transition-colors">
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         {/* Recent Activity */}
         <div className="lg:col-span-2 flex flex-col gap-8">
           <div className="flex justify-between items-center px-4">
-             <h2 className="text-2xl font-heading font-black uppercase tracking-tight">Recent Projects.</h2>
+             <h2 className="text-2xl font-heading font-black uppercase tracking-tight">Recent Portfolio.</h2>
              <Link href="/admin/projects" className="text-[10px] font-black uppercase tracking-widest text-primary hover:gap-3 transition-all flex items-center gap-2 underline underline-offset-8">
                View All <ArrowRight className="w-4 h-4" />
              </Link>
@@ -112,7 +112,7 @@ export default function DashboardPage() {
                  <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:text-white transition-all" />
               </Link>
               
-              <Link href="/admin/dashboard/services" className="p-8 bg-white border border-primary/5 rounded-[2rem] shadow-sm flex items-center justify-between group hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+              <Link href="/admin/dashboard/services" className="p-8 bg-zinc-950 text-white border border-zinc-800 rounded-[2rem] shadow-sm flex items-center justify-between group hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
                  <div className="flex items-center gap-6">
                     <Briefcase className="w-6 h-6 text-primary" />
                     <span className="font-black uppercase tracking-widest text-xs">Our Services</span>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                  <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-primary" />
               </Link>
               
-              <Link href="/admin/dashboard/testimonials" className="p-8 bg-white border border-primary/5 rounded-[2rem] shadow-sm flex items-center justify-between group hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+              <Link href="/admin/dashboard/testimonials" className="p-8 bg-zinc-950 text-white border border-zinc-800 rounded-[2rem] shadow-sm flex items-center justify-between group hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
                  <div className="flex items-center gap-6">
                     <Users className="w-6 h-6 text-primary" />
                     <span className="font-black uppercase tracking-widest text-xs">Testimonials</span>

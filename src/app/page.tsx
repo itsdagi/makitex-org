@@ -5,6 +5,8 @@ import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { CareersCTASection } from "@/components/sections/CareersCTASection";
+import { MapSection } from "@/components/sections/MapSection";
 import { Footer } from "@/components/sections/Footer";
 
 export default function Home() {
@@ -28,6 +30,8 @@ export default function Home() {
          
          <TestimonialsSection />
          <ContactSection />
+         <MapSection />
+         <CareersCTASection />
       </div>
 
       {/* Latest Journal Highlights could go here eventually */}
@@ -36,3 +40,4 @@ export default function Home() {
     </main>
   );
 }
+

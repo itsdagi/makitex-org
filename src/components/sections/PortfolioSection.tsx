@@ -1,27 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Container } from "@/components/ui/Container";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { ExternalLink, MapPin } from "lucide-react";
 import Link from "next/link";
 
-const categories = ["All", "Residential", "Commercial", "Infrastructure"];
-
-const projects = [
-  { id: 1, title: "Bole Luxury Residence", cat: "Residential", loc: "Bole, Addis Ababa", img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000" },
-  { id: 2, title: "Apex Tech Center", cat: "Commercial", loc: "Kazanchis", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000" },
-  { id: 3, title: "Summit View Apartments", cat: "Residential", loc: "Sarbet", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000" },
-  { id: 4, title: "Modern Bridge P-1", cat: "Infrastructure", loc: "Dukem", img: "https://images.unsplash.com/photo-1513360309081-38f0d12739a7?q=80&w=1000" },
-  { id: 5, title: "High-End Retail Hub", cat: "Commercial", loc: "Arat Kilo", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000" },
-  { id: 6, title: "Industrial Smart-Zone", cat: "Infrastructure", loc: "Piassa", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000" },
-];
-
 export const PortfolioSection = () => {
   const [activeTab, setActiveTab] = useState("All");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
-  const filtered = activeTab === "All" ? projects : projects.filter(p => p.cat === activeTab);
+  useEffect(() => {
+    async function fetchProjects() {
+      const { data } = await supabase.from("projects").select("*").eq("featured", true).order("display_order", { ascending: true });
+      if (data) {
+         setProjects(data);
+         const unique = Array.from(new Set(data.map((p: any) => p.category).filter(Boolean)));
+         setCategories(["All", ...(unique as string[])]);
+      }
+    }
+    fetchProjects();
+  }, []);
+
+  const filtered = activeTab === "All" ? projects : projects.filter(p => p.category === activeTab);
 
   return (
     <section id="projects" className="py-32 bg-accent/5 overflow-hidden">
@@ -65,7 +69,7 @@ export const PortfolioSection = () => {
                 className="group relative aspect-[3/4] rounded-[2.5rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/30 transition-all border border-primary/5 group"
               >
                 <img 
-                  src={p.img} 
+                  src={p.image_url || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000"} 
                   alt={p.title} 
                   className="w-full h-full object-cover transition-transform duration-1000 ease-in-out group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0" 
                 />
@@ -75,11 +79,11 @@ export const PortfolioSection = () => {
                   <div className="translate-y-12 group-hover:translate-y-0 transition-transform duration-500 ease-out">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="h-[2px] w-8 bg-primary block" />
-                      <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">{p.cat}</span>
+                      <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">{p.category || 'N/A'}</span>
                     </div>
                     <h3 className="text-4xl text-white font-heading font-black mb-4 leading-none">{p.title}</h3>
                     <p className="text-white/70 text-sm mb-8 flex items-center gap-2 font-medium">
-                      <MapPin className="w-4 h-4 text-primary" /> {p.loc}
+                      <MapPin className="w-4 h-4 text-primary" /> {p.location || 'Unknown Location'}
                     </p>
                     <Button variant="outline" className="h-14 w-full md:w-fit bg-white/10 text-white border-white/20 hover:bg-white hover:text-primary rounded-2xl group transition-all duration-300">
                       View Project <ExternalLink className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -89,26 +93,14 @@ export const PortfolioSection = () => {
 
                 {/* Categories Badge for mobile when not hovered */}
                 <div className="absolute top-6 left-6 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-white/20 group-hover:opacity-0 transition-opacity duration-300">
-                   <span className="text-[10px] text-white font-black uppercase tracking-widest">{p.cat}</span>
+                   <span className="text-[10px] text-white font-black uppercase tracking-widest">{p.category || 'N/A'}</span>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
         
-        <div className="mt-24 text-center">
-           <Button variant="outline" size="lg" className="h-20 px-16 text-xl rounded-full border-2 hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-95">
-             Explore All Projects
-           </Button>
-        </div>
       </Container>
-      <div className="mt-24 text-center">
-        <Link href="/projects">
-          <Button variant="outline" size="lg" className="h-20 px-16 text-xl rounded-full border-2 hover:bg-primary hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-[0_30px_60px_-15px_rgba(0,128,128,0.2)]">
-            Explore Full Portfolio
-          </Button>
-        </Link>
-      </div>
     </section>
   );
 };

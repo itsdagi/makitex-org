@@ -9,44 +9,34 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { Lightbox } from "@/components/ui/Lightbox";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-// Temporary mock data until fully connected to Supabase
-const PROJECT_DETAILS = {
-  "apex-tower": {
-    title: "Apex Tower",
-    category: "Commercial",
-    client: "Horizon Investments",
-    location: "Kazanchis, Addis Ababa",
-    year: "2024",
-    description: "The Apex Tower stands as a testament to modern commercial design. Integrating smart climate control and a striking glass facade, we delivered 12,000 sqm of premium office space.",
-    heroImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200",
-    beforeImage: "https://images.unsplash.com/photo-1541888081622-1262d08dbb09?q=80&w=1200", // Construction site
-    afterImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200", // Finished
-    gallery: [
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200",
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200",
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200",
-      "https://images.unsplash.com/photo-1541888081622-1262d08dbb09?q=80&w=1200",
-    ],
-    challenges: [
-      "Deep foundation excavation in a highly dense urban area.",
-      "Custom facade installation requiring specialized rigging.",
-      "Achieving LEED certification local equivalents."
-    ]
-  }
-};
+import { supabase } from "@/lib/supabase";
 
 export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: string }> }) {
   const unwrappedParams = use(params);
   const slug = unwrappedParams.slug;
-  const project = PROJECT_DETAILS[slug as keyof typeof PROJECT_DETAILS] || PROJECT_DETAILS["apex-tower"];
-  const [mounted, setMounted] = useState(false);
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    async function fetchProject() {
+      if (!slug) return;
+      const { data } = await supabase.from("projects").select("*").eq("slug", slug).single();
+      if (data) setProject(data);
+      setLoading(false);
+    }
+    fetchProject();
+  }, [slug]);
 
-  if (!mounted) return null;
+  if (loading) {
+    return <main className="bg-background min-h-screen flex items-center justify-center"><Navbar /><div className="mt-40 text-xl font-heading font-black text-primary uppercase animate-pulse">Loading Case Study...</div></main>
+  }
+  
+  if (!loading && !project) {
+    return <main className="bg-background min-h-screen flex flex-col items-center pt-40"><Navbar /><h1 className="text-4xl font-heading font-black uppercase">Project Not Found</h1><Link href="/projects" className="mt-4 text-primary underline">Back to Portfolio</Link></main>
+  }
 
   return (
     <main className="bg-background min-h-screen">
@@ -56,7 +46,7 @@ export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: s
       <section className="relative h-[80vh] min-h-[600px] flex items-end pb-24">
         <div className="absolute inset-0 -z-20">
           <img 
-            src={project.heroImage} 
+            src={project.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200"} 
             alt={project.title} 
             className="w-full h-full object-cover grayscale-[0.2]" 
           />
@@ -90,11 +80,11 @@ export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: s
           </div>
           <div>
             <span className="block text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-1">Year</span>
-            <span className="font-bold text-sm md:text-base">{project.year}</span>
+            <span className="font-bold text-sm md:text-base">{project.completion_year || "Ongoing"}</span>
           </div>
           <div>
-            <span className="block text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-1">Services</span>
-            <span className="font-bold text-sm md:text-base">Design & Build</span>
+            <span className="block text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-1">Status</span>
+            <span className="font-bold text-sm md:text-base">Completed</span>
           </div>
         </Container>
       </section>
@@ -103,28 +93,19 @@ export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: s
       <section className="py-24">
         <Container className="max-w-5xl">
           <div className="grid md:grid-cols-3 gap-16">
-            <div className="md:col-span-2 prose prose-lg prose-neutral dark:prose-invert">
-              <h2 className="text-4xl font-heading font-black tracking-tighter mb-6">The Vision</h2>
-              <p className="text-muted-foreground leading-relaxed text-xl font-medium">
-                {project.description}
-              </p>
-
-              <h3 className="text-2xl font-bold mt-12 mb-6">Key Challenges & Solutions</h3>
-              <ul className="space-y-4 list-none p-0">
-                {project.challenges.map((challenge, i) => (
-                  <motion.li 
-                    key={i}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex items-start gap-4 p-4 bg-accent/20 rounded-xl border border-border"
-                  >
-                    <CheckCircle2 className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-                    <span className="font-medium text-foreground">{challenge}</span>
-                  </motion.li>
-                ))}
-              </ul>
+            <div className="md:col-span-2 prose prose-xl prose-invert max-w-none text-muted-foreground font-body leading-[1.8] marker:text-primary prose-headings:font-heading prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground">
+              {project.content ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {project.content}
+                </ReactMarkdown>
+              ) : (
+                <>
+                  <h2 className="text-4xl font-heading font-black tracking-tighter mb-6">The Vision</h2>
+                  <p className="text-muted-foreground leading-relaxed text-xl font-medium">
+                    {project.description}
+                  </p>
+                </>
+              )}
             </div>
             
             <div className="space-y-12">
@@ -145,7 +126,7 @@ export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: s
       <section className="pb-32 bg-accent/10">
         <Container className="max-w-5xl">
            <h2 className="text-4xl font-heading font-black tracking-tighter mb-10 text-center">Transformation</h2>
-           <BeforeAfterSlider beforeImage={project.beforeImage} afterImage={project.afterImage} />
+           <BeforeAfterSlider beforeImage={project.beforeImage || project.image_url} afterImage={project.afterImage || project.image_url} />
         </Container>
       </section>
 
@@ -153,7 +134,7 @@ export default function ProjectCaseStudy({ params }: { params: Promise<{ slug: s
       <section className="py-32">
         <Container className="max-w-6xl">
            <h2 className="text-4xl font-heading font-black tracking-tighter mb-10 text-center">Project Gallery</h2>
-           <Lightbox images={project.gallery} />
+           <Lightbox images={project.gallery_images || []} />
         </Container>
       </section>
 

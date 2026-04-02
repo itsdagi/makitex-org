@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -22,13 +22,22 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ProjectEditorModal } from "@/components/admin/ProjectEditorModal";
 
-const allProjects = [
-  { id: 1, title: "Apex Tower", cat: "Commercial", loc: "Kazanchis", area: "12,000 sqm", year: "2024", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=200" },
-  { id: 2, title: "Bole Luxury Estate", cat: "Residential", loc: "Bole", area: "4,500 sqm", year: "2023", img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=200" },
-  { id: 3, title: "Summit Highlands", cat: "Residential", loc: "Sarbet", area: "3,200 sqm", year: "2024", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=200" },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function AdminProjectsPage() {
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(true);
+
+  const fetchProjects = async () => {
+    setFetchLoading(true);
+    const { data } = await supabase.from("projects").select("*").order("display_order", { ascending: true });
+    if (data) setAllProjects(data);
+    setFetchLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
   const [view, setView] = useState("Grid");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<any>(null);
@@ -56,12 +65,12 @@ export default function AdminProjectsPage() {
           className="h-20 px-12 rounded-[2rem] flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
         >
            <Plus className="w-6 h-6" />
-           <span className="text-xl font-heading font-black tracking-widest leading-none">Add Project</span>
+           <span className="text-xl font-heading font-black tracking-widest leading-none">Add Portfolio Item</span>
         </Button>
       </header>
 
       {/* Filter and View Toggle */}
-      <section className="flex flex-col md:flex-row justify-between items-center gap-8 bg-white p-6 rounded-[2rem] border border-primary/5 shadow-sm">
+      <section className="flex flex-col md:flex-row justify-between items-center gap-8 bg-zinc-950 text-white p-6 rounded-[2rem] border border-zinc-800 shadow-sm">
          <div className="flex items-center gap-4 p-1 bg-accent/20 rounded-xl border">
             {["Residential", "Commercial", "Industrial", "Infrastructure"].map(t => (
                <button key={t} className="px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest hover:text-primary transition-colors">
@@ -90,7 +99,7 @@ export default function AdminProjectsPage() {
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                <input 
                  type="text" 
-                 placeholder="Search project ID..." 
+                 placeholder="Search portfolio entry..." 
                  className="bg-accent/20 h-14 pl-12 pr-6 rounded-xl border border-transparent focus:border-primary/30 outline-none transition-all text-sm font-medium w-64"
                />
             </div>
@@ -105,16 +114,16 @@ export default function AdminProjectsPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="group h-full bg-white border border-primary/5 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700"
+            className="group h-full bg-zinc-950 border border-zinc-800 text-white rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl hover:border-primary/50 transition-all duration-700"
           >
             <div className="relative h-64 overflow-hidden">
                <img 
-                 src={p.img} 
+                 src={p.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=200"} 
                  alt={p.title} 
                  className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" 
                />
                <div className="absolute top-6 left-6 px-4 py-2 bg-background/80 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-primary border border-primary/20">
-                  {p.cat}
+                  {p.category || 'N/A'}
                </div>
                <div className="absolute top-6 right-6 hidden group-hover:flex gap-2 transition-all">
                   <Button 
@@ -124,7 +133,15 @@ export default function AdminProjectsPage() {
                   >
                      <Edit2 className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" className="h-10 w-10 p-0 rounded-xl bg-rose-500/10 backdrop-blur-md border border-rose-500/30 hover:bg-rose-500 text-rose-600 hover:text-white transition-all">
+                  <Button 
+                    variant="outline" 
+                    onClick={async () => {
+                      if(confirm("Are you sure?")) {
+                        await supabase.from("projects").delete().eq("id", p.id);
+                        fetchProjects();
+                      }
+                    }}
+                    className="h-10 w-10 p-0 rounded-xl bg-rose-500/10 backdrop-blur-md border border-rose-500/30 hover:bg-rose-500 text-rose-600 hover:text-white transition-all">
                      <Trash2 className="w-4 h-4" />
                   </Button>
                </div>
@@ -141,12 +158,12 @@ export default function AdminProjectsPage() {
                
                <div className="grid grid-cols-2 gap-6 pt-6 border-t border-primary/5">
                   <div className="flex flex-col gap-1">
-                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-none">Surface Area</span>
-                     <span className="text-sm font-black italic">{p.area}</span>
+                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-none">Location</span>
+                     <span className="text-sm font-black italic">{p.location || 'Unknown'}</span>
                   </div>
                   <div className="flex flex-col gap-1">
                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-none">Completion</span>
-                     <span className="text-sm font-black italic">{p.year}</span>
+                     <span className="text-sm font-black italic">{p.completion_year || 'Ongoing'}</span>
                   </div>
                </div>
                
@@ -194,7 +211,7 @@ export default function AdminProjectsPage() {
          isOpen={isEditorOpen}
          onClose={() => setIsEditorOpen(false)}
          projectToEdit={projectToEdit}
-         onSave={() => console.log('refresh metrics')}
+         onSave={() => fetchProjects()}
       />
     </div>
   );

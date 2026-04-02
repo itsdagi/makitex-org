@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "@/components/ui/Container";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/sections/Footer";
@@ -11,19 +11,21 @@ import Link from "next/link";
 
 const categories = ["All", "Residential", "Commercial", "Industrial", "Infrastructure"];
 
-const allProjects = [
-  { id: 1, title: "Apex Tower", slug: "apex-tower", cat: "Commercial", loc: "Kazanchis, Addis Ababa", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200", area: "12,000 sqm", year: "2024" },
-  { id: 2, title: "Bole Luxury Estate", slug: "bole-luxury-estate", cat: "Residential", loc: "Bole Sub-city", img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200", area: "4,500 sqm", year: "2023" },
-  { id: 3, title: "Summit Highlands", slug: "summit-highlands", cat: "Residential", loc: "Sarbet, Addis Ababa", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200", area: "3,200 sqm", year: "2024" },
-  { id: 4, title: "Industrial Smart-Zone", slug: "industrial-smart-zone", cat: "Industrial", loc: "Dukem Industrial Park", img: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=1200", area: "50,000 sqm", year: "2022" },
-  { id: 5, title: "Metropolitan Bridge", slug: "metropolitan-bridge", cat: "Infrastructure", loc: "Addis-Adama Expressway", img: "https://images.unsplash.com/photo-1513360309081-38f0d12739a7?q=80&w=1200", area: "500m Span", year: "2023" },
-  { id: 6, title: "Global Retail Hub", slug: "global-retail-hub", cat: "Commercial", loc: "Piassa, Addis Ababa", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200", area: "8,000 sqm", year: "2024" },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState("All");
+  const [allProjects, setAllProjects] = useState<any[]>([]);
 
-  const filtered = activeTab === "All" ? allProjects : allProjects.filter(p => p.cat === activeTab);
+  useEffect(() => {
+    async function fetchProjects() {
+      const { data } = await supabase.from("projects").select("*").order("display_order", { ascending: true });
+      if (data) setAllProjects(data);
+    }
+    fetchProjects();
+  }, []);
+
+  const filtered = activeTab === "All" ? allProjects : allProjects.filter(p => p.category === activeTab);
 
   return (
     <main className="bg-background pt-32 min-h-screen">
@@ -111,9 +113,9 @@ export default function ProjectsPage() {
                   transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   className="group relative h-[450px] md:h-[600px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-primary/5 cursor-pointer"
                 >
-                  <Link href={`/projects/${p.slug}`} className="block w-full h-full relative cursor-pointer group">
+                  <Link href={`/portfolio/${p.slug}`} className="block w-full h-full relative cursor-pointer group">
                     <img 
-                      src={p.img} 
+                      src={p.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200"} 
                       alt={p.title} 
                       className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] transition-all duration-1000 group-hover:scale-110 group-hover:grayscale-0" 
                     />
@@ -123,7 +125,7 @@ export default function ProjectsPage() {
                       <div className="translate-y-8 md:translate-y-16 group-hover:translate-y-0 transition-transform duration-700 ease-out">
                         <div className="flex items-center gap-3 mb-4 md:mb-6">
                           <span className="h-[2px] w-8 md:w-12 bg-primary block" />
-                          <span className="text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">{p.cat}</span>
+                          <span className="text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">{p.category || "N/A"}</span>
                         </div>
                         <h3 className="text-3xl sm:text-4xl md:text-5xl text-white font-heading font-black mb-6 md:mb-10 leading-none">{p.title}</h3>
                         
@@ -132,19 +134,19 @@ export default function ProjectsPage() {
                             <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
                               <MapPin className="w-3 h-3 hidden sm:block" /> Location
                             </span>
-                            <span className="text-white text-[10px] md:text-xs font-bold uppercase truncate">{p.loc}</span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase truncate">{p.location || "Unknown"}</span>
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
                               <Maximize className="w-3 h-3 hidden sm:block" /> Area
                             </span>
-                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.area}</span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.description || "N/A"}</span>
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="flex items-center gap-2 text-white/40 text-[9px] md:text-[10px] uppercase font-black tracking-widest">
                               <Calendar className="w-3 h-3 hidden sm:block" /> Year
                             </span>
-                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.year}</span>
+                            <span className="text-white text-[10px] md:text-xs font-bold uppercase">{p.completion_year || "N/A"}</span>
                           </div>
                         </div>
 

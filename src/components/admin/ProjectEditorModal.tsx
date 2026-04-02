@@ -28,9 +28,23 @@ export const ProjectEditorModal = ({ isOpen, onClose, projectToEdit, onSave }: P
     gallery_images: [] as string[],
     featured: false,
     display_order: 0,
+    before_image: "",
+    after_image: "",
   });
 
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchCategories() {
+       const { data } = await supabase.from("projects").select("category");
+       if (data) {
+           const unique = Array.from(new Set(data.map((d:any) => d.category).filter(Boolean)));
+           setExistingCategories(unique as string[]);
+       }
+    }
+    fetchCategories();
+  }, [supabase]);
 
   useEffect(() => {
     if (projectToEdit) {
@@ -49,6 +63,8 @@ export const ProjectEditorModal = ({ isOpen, onClose, projectToEdit, onSave }: P
         gallery_images: [],
         featured: false,
         display_order: 0,
+        before_image: "",
+        after_image: "",
       });
     }
   }, [projectToEdit, isOpen]);
@@ -125,12 +141,16 @@ export const ProjectEditorModal = ({ isOpen, onClose, projectToEdit, onSave }: P
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 block">Category</label>
                     <input
+                      list="category-suggestions"
                       type="text"
                       className="w-full p-4 border rounded-2xl bg-accent/10 outline-none focus:border-primary transition-colors text-sm font-medium"
                       placeholder="Residential, Commercial, etc."
                       value={formData.category}
                       onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                     />
+                    <datalist id="category-suggestions">
+                       {existingCategories.map(c => <option key={c} value={c} />)}
+                    </datalist>
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 block">Location</label>
@@ -174,6 +194,16 @@ export const ProjectEditorModal = ({ isOpen, onClose, projectToEdit, onSave }: P
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   />
                 </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 block">The Vision & Challenges (Markdown)</label>
+                  <textarea
+                    className="w-full p-5 border rounded-2xl bg-accent/10 outline-none focus:border-primary transition-colors min-h-[220px] resize-none text-sm font-medium"
+                    placeholder="Describe the Vision, bullet point Key Challenges, etc..."
+                    value={formData.content || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                  />
+                </div>
               </div>
 
               {/* Sidebar Settings */}
@@ -194,8 +224,40 @@ export const ProjectEditorModal = ({ isOpen, onClose, projectToEdit, onSave }: P
                     type="text"
                     className="w-full p-4 border rounded-xl bg-accent/10 outline-none focus:border-primary transition-colors text-xs"
                     placeholder="https://images.unsplash..."
-                    value={formData.image_url}
+                    value={formData.image_url || ""}
                     onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 block">Transformation (Before Image)</label>
+                  <input
+                    type="text"
+                    className="w-full p-4 border rounded-xl bg-accent/10 outline-none focus:border-primary transition-colors text-xs"
+                    placeholder="Before Image URL..."
+                    value={formData.before_image || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, before_image: e.target.value }))}
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 block">Transformation (After Image)</label>
+                  <input
+                    type="text"
+                    className="w-full p-4 border rounded-xl bg-accent/10 outline-none focus:border-primary transition-colors text-xs"
+                    placeholder="After Image URL..."
+                    value={formData.after_image || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, after_image: e.target.value }))}
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 block">Project Gallery Images (Comma separated URLs)</label>
+                  <textarea
+                    className="w-full p-4 border rounded-xl bg-accent/10 outline-none focus:border-primary transition-colors text-xs min-h-[80px]"
+                    placeholder="Image URL 1, Image URL 2..."
+                    value={(formData.gallery_images || []).join(', ')}
+                    onChange={(e) => setFormData(prev => ({ ...prev, gallery_images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
                   />
                 </div>
 

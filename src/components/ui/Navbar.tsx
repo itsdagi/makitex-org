@@ -7,26 +7,37 @@ import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { QuoteModal } from "./QuoteModal";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email === "dagimalemux@gmail.com") {
+        setIsAdmin(true);
+      }
+    };
+    checkAuth();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
-    { name: "Services", href: "#services" },
-    { name: "Projects", href: "#projects" },
-    { name: "About", href: "#about" },
-    { name: "Testimonials", href: "#testimonials" },
-    { name: "Contact", href: "#contact" },
+    { name: "Services", href: "/#services" },
+    { name: "Portfolio", href: "/portfolio" },
+    { name: "About", href: "/#about" },
+    { name: "Contact", href: "/#contact" },
     { name: "Blog", href: "/blog" },
   ];
 
@@ -58,9 +69,16 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            {isAdmin && (
+              <Link href="/admin">
+                <Button size="sm" variant="outline" className="rounded-full px-6 lg:px-8 h-10 lg:h-12 text-[10px] lg:text-xs font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary hover:text-white transition-all">
+                  Workshop
+                </Button>
+              </Link>
+            )}
             <Button size="sm" onClick={() => setIsQuoteOpen(true)} className="rounded-full px-6 lg:px-8 h-10 lg:h-12 text-[10px] lg:text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all overflow-hidden group relative">
-              <span className="relative z-10 flex items-center gap-2">Initiate <span className="w-1.5 h-1.5 rounded-full bg-white opacity-80 animate-pulse-slow block" /></span>
+              <span className="relative z-10 flex items-center gap-2">Get Started <span className="w-1.5 h-1.5 rounded-full bg-white opacity-80 animate-pulse-slow block" /></span>
               <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
             </Button>
           </div>
@@ -119,12 +137,23 @@ export const Navbar = () => {
               </div>
 
               <div className="mt-auto">
-                <Button onClick={() => { setIsMenuOpen(false); setIsQuoteOpen(true); }} className="w-full h-16 rounded-2xl text-lg font-bold">
-                  Book a Consultation
-                </Button>
+                <div className="flex flex-col gap-3">
+                  {isAdmin && (
+                    <Link href="/admin">
+                      <Button variant="outline" className="w-full h-16 rounded-2xl text-lg font-bold border-primary/20 text-primary hover:bg-primary hover:text-white">
+                        Workshop Access
+                      </Button>
+                    </Link>
+                  )}
+                  <Button onClick={() => { setIsMenuOpen(false); setIsQuoteOpen(true); }} className="w-full h-16 rounded-2xl text-lg font-bold">
+                    Book a Consultation
+                  </Button>
+                </div>
                 <div className="mt-8 pt-8 border-t flex flex-col gap-2">
                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-none">Contact</p>
-                   <p className="font-heading font-bold text-lg">info@makitex.com</p>
+                   <a href="mailto:makitextrading@gmail.com" className="font-heading font-bold text-base hover:text-primary transition-colors">makitextrading@gmail.com</a>
+                   <a href="tel:+251714857133" className="font-heading font-bold text-base hover:text-primary transition-colors">+251 71 485 7133</a>
+                   <a href="tel:+251913264556" className="font-heading font-bold text-base hover:text-primary transition-colors">+251 91 326 4556</a>
                 </div>
               </div>
             </motion.div>

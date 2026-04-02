@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { Container } from "@/components/ui/Container";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/sections/Footer";
@@ -10,35 +12,34 @@ import { Button } from "@/components/ui/Button";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useParams } from 'next/navigation';
-
-const dummyContent = `
-# The Future of Sustainable Architecture in Ethiopia
-
-Sustainability isn't just a buzzword; it's the foundation of modern engineering. In Addis Ababa, we're seeing a shift towards local material integration and high-performance building envelopes.
-
-## 1. Local Stone & Thermal Mass
-Using local basalt and volcanic stone allows us to leverage natural thermal mass, reducing the need for active cooling and heating systems. This approach not only lowers the carbon footprint but also aligns our modern designs with the historical tectonic language of Ethiopia.
-
-## 2. Solar Harvesting & Passive Design
-With our high altitude and clear sunlight, solar energy is an underutilized goldmine. By integrating photovoltaic facades and optimizing window-to-wall ratios, we can achieve net-zero energy status for many boutique commercial projects.
-
-> "True architecture is a dialogue between the earth and the sky. In the horn of Africa, this dialogue requires a unique language of shade, light, and mass."
-
-### The Makitex Approach
-At Makitex Trading PLC, we prioritize:
-- **Biophilic Design**: Integrating vertical gardens and natural ventilation.
-- **Smart Infrastructure**: Using IoT sensors to monitor structural loads and energy consumption.
-- **Longevity**: Building for centuries, not decades.
-
----
-Stay tuned for more updates on our latest projects.
-`;
+import { supabase } from "@/lib/supabase";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchPost() {
+      if (!slug) return;
+      const { data } = await supabase.from("blogs").select("*").eq("slug", slug).single();
+      if (data) setPost(data);
+      setLoading(false);
+    }
+    fetchPost();
+  }, [slug]);
+
   const { scrollYProgress } = useScroll();
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 1.2]);
   const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.8]);
+
+  if (loading) {
+    return <main className="bg-background min-h-screen flex flex-col pt-32 items-center"><Navbar /><div className="mt-40 text-xl font-heading font-black tracking-widest text-primary uppercase animate-pulse">Retrieving Entry...</div></main>
+  }
+  
+  if (!loading && !post) {
+    return <main className="bg-background min-h-screen flex flex-col pt-32 items-center"><Navbar /><div className="mt-40 text-2xl font-heading font-black tracking-widest uppercase">Post not found.</div><Link href="/blog" className="mt-8 text-primary underline">Return to Journal</Link></main>
+  }
 
   return (
     <main className="bg-background min-h-screen">
@@ -51,17 +52,8 @@ export default function BlogPostPage() {
       />
 
       {/* Hero Header */}
-      <header className="relative h-[80vh] w-full overflow-hidden">
-        <motion.div style={{ scale, opacity }} className="absolute inset-0">
-          <img 
-             src="https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=2000" 
-             alt="Post Cover" 
-             className="w-full h-full object-cover grayscale-[0.5]" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        </motion.div>
-        
-        <Container className="absolute inset-0 flex flex-col justify-end pb-24 z-10">
+      <header className="pt-40 pb-12 w-full relative">
+        <Container className="flex flex-col z-10 relative">
           <Link href="/blog" className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-10 group w-fit">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" /> Makitex Journal
           </Link>
@@ -72,16 +64,16 @@ export default function BlogPostPage() {
                animate={{ opacity: 1, y: 0 }}
                className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mb-6"
              >
-                <span className="text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20">Featured Entry</span>
-                <span>March 15, 2026</span>
+                <span className="text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20">{post.category || "Article"}</span>
+                <span>{new Date(post.created_at).toLocaleDateString()}</span>
              </motion.div>
              <motion.h1 
                initial={{ opacity: 0, y: 40 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.1, duration: 0.8 }}
-               className="text-6xl md:text-8xl lg:text-9xl font-heading font-black tracking-tighter leading-[0.8] uppercase"
+               className="text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tighter leading-[0.9] uppercase"
              >
-                Building the <span className="text-primary italic">Sustainable</span> Horizon.
+                {post.title}
              </motion.h1>
              <motion.div 
                initial={{ opacity: 0 }}
@@ -89,18 +81,28 @@ export default function BlogPostPage() {
                transition={{ delay: 0.3 }}
                className="flex items-center gap-6 mt-12"
              >
-                <img src="https://i.pravatar.cc/150?u=a" alt="Author" className="w-16 h-16 rounded-full border-2 border-primary/20" />
+                <img src={`https://ui-avatars.com/api/?name=${post.author || 'Admin'}&background=random`} alt="Author" className="w-16 h-16 rounded-full border-2 border-primary/20" />
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Author</span>
-                  <span className="text-xl font-heading font-black uppercase">Eng. Samuel K.</span>
+                  <span className="text-xl font-heading font-black uppercase">{post.author || 'Admin'}</span>
                 </div>
              </motion.div>
           </div>
         </Container>
       </header>
 
-      {/* Content Section */}
-      <section className="py-24 md:py-40 relative">
+      <Container className="pb-12 md:pb-24">
+         <motion.div style={{ scale, opacity }} className="w-full h-[40vh] md:h-[60vh] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-primary/10 relative">
+           <img 
+             src={post.image_url || "https://images.unsplash.com/photo-1518005020251-095c1a2702c1?q=80&w=2000"} 
+             alt="Post Cover" 
+             className="w-full h-full object-cover" 
+           />
+         </motion.div>
+      </Container>
+
+          {/* Content Section */}
+      <section className="py-12 md:py-24 relative">
         <div className="absolute top-0 right-0 w-1/4 h-1/2 bg-primary/5 blur-[150px] -z-10" />
         <Container className="grid lg:grid-cols-12 gap-20">
           
@@ -138,7 +140,7 @@ export default function BlogPostPage() {
             className="lg:col-span-7 prose prose-xl prose-invert max-w-none text-muted-foreground font-body leading-[1.8] marker:text-primary prose-headings:font-heading prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter prose-headings:text-foreground prose-blockquote:border-primary prose-blockquote:bg-accent/5 prose-blockquote:p-8 prose-blockquote:rounded-3xl prose-blockquote:italic prose-a:text-primary prose-strong:text-foreground"
           >
              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-               {dummyContent}
+               {post.content}
              </ReactMarkdown>
           </motion.article>
           

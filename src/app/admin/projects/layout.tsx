@@ -1,6 +1,6 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
-export default function AdminDashboardLayout({
+export default function AdminProjectsLayout({
   children,
 }: {
   children: React.ReactNode;
